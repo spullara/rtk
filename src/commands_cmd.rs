@@ -336,7 +336,7 @@ pub fn run(short: bool) -> Result<()> {
     if short {
         let names: Vec<&str> = COMMANDS
             .iter()
-            .filter(|c| c.category != "Meta")
+            .filter(|c| c.category != "Meta" && c.name != "proxy")
             .map(|c| c.name)
             .collect();
         println!("{}", names.join(","));
@@ -382,7 +382,7 @@ mod tests {
     fn test_short_excludes_meta_commands() {
         let names: Vec<&str> = COMMANDS
             .iter()
-            .filter(|c| c.category != "Meta")
+            .filter(|c| c.category != "Meta" && c.name != "proxy")
             .map(|c| c.name)
             .collect();
         // Meta commands should not appear
@@ -390,10 +390,11 @@ mod tests {
         assert!(!names.contains(&"gain"));
         assert!(!names.contains(&"config"));
         assert!(!names.contains(&"commands"));
+        // proxy doesn't filter, exclude it too
+        assert!(!names.contains(&"proxy"));
         // Proxied commands should appear
         assert!(names.contains(&"git"));
         assert!(names.contains(&"cargo"));
-        assert!(names.contains(&"proxy"));
     }
 
     #[test]

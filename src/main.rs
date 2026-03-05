@@ -616,7 +616,11 @@ enum Commands {
 
     /// List all proxied commands and their token savings
     #[command(name = "commands")]
-    ListCommands,
+    ListCommands {
+        /// Output only command names as comma-separated list (for agent prompts)
+        #[arg(short, long)]
+        short: bool,
+    },
 }
 
 #[derive(Subcommand)]
@@ -1753,8 +1757,8 @@ fn main() -> Result<()> {
             integrity::run_verify(cli.verbose)?;
         }
 
-        Commands::ListCommands => {
-            commands_cmd::run()?;
+        Commands::ListCommands { short } => {
+            commands_cmd::run(short)?;
         }
     }
 

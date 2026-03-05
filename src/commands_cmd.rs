@@ -332,7 +332,17 @@ static COMMANDS: &[CommandInfo] = &[
     },
 ];
 
-pub fn run() -> Result<()> {
+pub fn run(short: bool) -> Result<()> {
+    if short {
+        let names: Vec<&str> = COMMANDS
+            .iter()
+            .filter(|c| c.category != "Meta")
+            .map(|c| c.name)
+            .collect();
+        println!("{}", names.join(","));
+        return Ok(());
+    }
+
     println!(
         "rtk commands \u{2014} {}+ proxied commands\n",
         COMMANDS.len()
@@ -360,7 +370,30 @@ mod tests {
 
     #[test]
     fn test_run_succeeds() {
-        assert!(run().is_ok());
+        assert!(run(false).is_ok());
+    }
+
+    #[test]
+    fn test_run_short_succeeds() {
+        assert!(run(true).is_ok());
+    }
+
+    #[test]
+    fn test_short_excludes_meta_commands() {
+        let names: Vec<&str> = COMMANDS
+            .iter()
+            .filter(|c| c.category != "Meta")
+            .map(|c| c.name)
+            .collect();
+        // Meta commands should not appear
+        assert!(!names.contains(&"init"));
+        assert!(!names.contains(&"gain"));
+        assert!(!names.contains(&"config"));
+        assert!(!names.contains(&"commands"));
+        // Proxied commands should appear
+        assert!(names.contains(&"git"));
+        assert!(names.contains(&"cargo"));
+        assert!(names.contains(&"proxy"));
     }
 
     #[test]

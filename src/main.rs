@@ -2,6 +2,7 @@ mod aws_cmd;
 mod cargo_cmd;
 mod cc_economics;
 mod ccusage;
+mod commands_cmd;
 mod config;
 mod container;
 mod curl_cmd;
@@ -612,6 +613,10 @@ enum Commands {
         /// Raw command to rewrite (e.g. "git status", "cargo test && git push")
         cmd: String,
     },
+
+    /// List all proxied commands and their token savings
+    #[command(name = "commands")]
+    ListCommands,
 }
 
 #[derive(Subcommand)]
@@ -938,6 +943,7 @@ const RTK_META_COMMANDS: &[&str] = &[
     "proxy",
     "hook-audit",
     "cc-economics",
+    "commands",
 ];
 
 fn run_fallback(parse_error: clap::Error) -> Result<()> {
@@ -1746,6 +1752,10 @@ fn main() -> Result<()> {
         Commands::Verify => {
             integrity::run_verify(cli.verbose)?;
         }
+
+        Commands::ListCommands => {
+            commands_cmd::run()?;
+        }
     }
 
     Ok(())
@@ -1985,6 +1995,7 @@ mod tests {
             vec!["rtk", "proxy", "echo", "hi"],
             vec!["rtk", "hook-audit"],
             vec!["rtk", "cc-economics"],
+            vec!["rtk", "commands"],
         ];
         for args in &meta_cmds_that_parse {
             let result = Cli::try_parse_from(args.iter());

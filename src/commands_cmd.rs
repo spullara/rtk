@@ -17,7 +17,7 @@ static COMMANDS: &[CommandInfo] = &[
     },
     CommandInfo {
         name: "gh",
-        category: "Git",
+        category: "GitHub",
         savings: "80-87%",
         description: "GitHub CLI (pr, issue, run, repo)",
     },
@@ -130,7 +130,7 @@ static COMMANDS: &[CommandInfo] = &[
     CommandInfo {
         name: "npx",
         category: "JS/TS",
-        savings: "varies",
+        savings: "-",
         description: "npx with intelligent routing",
     },
     // Files
@@ -269,94 +269,27 @@ static COMMANDS: &[CommandInfo] = &[
         savings: "0%",
         description: "Execute without filtering",
     },
-    // Meta
-    CommandInfo {
-        name: "init",
-        category: "Meta",
-        savings: "\u{2014}",
-        description: "Initialize rtk in project",
-    },
-    CommandInfo {
-        name: "gain",
-        category: "Meta",
-        savings: "\u{2014}",
-        description: "Token savings analytics",
-    },
-    CommandInfo {
-        name: "config",
-        category: "Meta",
-        savings: "\u{2014}",
-        description: "Show/create config file",
-    },
-    CommandInfo {
-        name: "verify",
-        category: "Meta",
-        savings: "\u{2014}",
-        description: "Verify hook integrity",
-    },
-    CommandInfo {
-        name: "discover",
-        category: "Meta",
-        savings: "\u{2014}",
-        description: "Find missed savings",
-    },
-    CommandInfo {
-        name: "learn",
-        category: "Meta",
-        savings: "\u{2014}",
-        description: "Learn CLI corrections",
-    },
-    CommandInfo {
-        name: "commands",
-        category: "Meta",
-        savings: "\u{2014}",
-        description: "This command",
-    },
-    CommandInfo {
-        name: "rewrite",
-        category: "Meta",
-        savings: "\u{2014}",
-        description: "Rewrite raw \u{2192} rtk (for hooks)",
-    },
-    CommandInfo {
-        name: "hook-audit",
-        category: "Meta",
-        savings: "\u{2014}",
-        description: "Hook rewrite audit metrics",
-    },
-    CommandInfo {
-        name: "cc-economics",
-        category: "Meta",
-        savings: "\u{2014}",
-        description: "Claude Code economics",
-    },
 ];
 
 pub fn run(short: bool) -> Result<()> {
     if short {
         let names: Vec<&str> = COMMANDS
             .iter()
-            .filter(|c| c.category != "Meta" && c.name != "proxy")
+            .filter(|c| c.name != "proxy")
             .map(|c| c.name)
             .collect();
         println!("{}", names.join(","));
         return Ok(());
     }
 
-    println!(
-        "rtk commands \u{2014} {}+ proxied commands\n",
-        COMMANDS.len()
-    );
+    println!("rtk commands — {}+ proxied commands\n", COMMANDS.len());
     println!("  {:<16} {:<10} DESCRIPTION", "COMMAND", "SAVINGS");
 
     let mut current_category = "";
     for cmd in COMMANDS {
         if cmd.category != current_category {
             current_category = cmd.category;
-            println!(
-                "  \u{2500}\u{2500}\u{2500} {} \u{2500}\u{2500}\u{2500}",
-                current_category
-            );
+            println!("  ─── {} ───", current_category);
         }
         println!("  {:<16} {:<10} {}", cmd.name, cmd.savings, cmd.description);
     }
@@ -379,20 +312,24 @@ mod tests {
     }
 
     #[test]
-    fn test_short_excludes_meta_commands() {
+    fn test_no_meta_commands_in_list() {
+        for cmd in COMMANDS {
+            assert_ne!(
+                cmd.category, "Meta",
+                "{} should not be in COMMANDS",
+                cmd.name
+            );
+        }
+    }
+
+    #[test]
+    fn test_short_excludes_proxy() {
         let names: Vec<&str> = COMMANDS
             .iter()
-            .filter(|c| c.category != "Meta" && c.name != "proxy")
+            .filter(|c| c.name != "proxy")
             .map(|c| c.name)
             .collect();
-        // Meta commands should not appear
-        assert!(!names.contains(&"init"));
-        assert!(!names.contains(&"gain"));
-        assert!(!names.contains(&"config"));
-        assert!(!names.contains(&"commands"));
-        // proxy doesn't filter, exclude it too
         assert!(!names.contains(&"proxy"));
-        // Proxied commands should appear
         assert!(names.contains(&"git"));
         assert!(names.contains(&"cargo"));
     }
